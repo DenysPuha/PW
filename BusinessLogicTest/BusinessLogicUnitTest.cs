@@ -71,7 +71,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       {
         throw new NotImplementedException();
       }
-    }
+
+            public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            {
+                throw new NotImplementedException();
+            }
+        }
 
     private class DataLayerDisposeFixcure : Data.DataAbstractAPI
     {
@@ -86,7 +91,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       {
         throw new NotImplementedException();
       }
-    }
+
+            public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            {
+                throw new NotImplementedException();
+            }
+        }
 
     private class DataLayerStartFixcure : Data.DataAbstractAPI
     {
@@ -103,7 +113,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
       }
 
-      private record DataVectorFixture : Data.IVector
+            public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            {
+                throw new NotImplementedException();
+            }
+
+            private record DataVectorFixture : Data.IVector
       {
         public double x { get; init; }
         public double y { get; init; }

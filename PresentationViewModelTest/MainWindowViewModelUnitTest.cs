@@ -86,11 +86,16 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         return new NullDisposable();
       }
 
-      #endregion ModelAbstractApi
+            public override void UpdateBallsCount(int numberofBalls)
+            {
+                throw new NotImplementedException();
+            }
 
-      #region private
+            #endregion ModelAbstractApi
 
-      private class NullDisposable : IDisposable
+            #region private
+
+            private class NullDisposable : IDisposable
       {
         public void Dispose()
         { }
@@ -137,11 +142,16 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Disposed = true;
       }
 
-      #endregion ModelAbstractApi
+            public override void UpdateBallsCount(int numberofBalls)
+            {
+                throw new NotImplementedException();
+            }
 
-      #region API
+            #endregion ModelAbstractApi
 
-      public event EventHandler<BallChaneEventArgs> BallChanged;
+            #region API
+
+            public event EventHandler<BallChaneEventArgs> BallChanged;
 
       #endregion API
 

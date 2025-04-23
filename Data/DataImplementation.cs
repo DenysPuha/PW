@@ -35,7 +35,7 @@ namespace TP.ConcurrentProgramming.Data
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
-                Ball? newBall; // ? - znaczy, że wartość może być null
+                Ball? newBall;
                 Vector startingPosition;
                 Vector startingVelocity;
                 Vector predictDelta = new(0, 0);
@@ -43,7 +43,7 @@ namespace TP.ConcurrentProgramming.Data
                 {
                     startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                     startingVelocity = new((random.NextDouble() - 0.5) * 6, (random.NextDouble() - 0.5) * 6);
-                    newBall = new(startingPosition, startingVelocity); // prędkość - velocity
+                    newBall = new(startingPosition, startingVelocity);
                 } while (IsValidMode(startingPosition, newBall)!=-1);
         
         upperLayerHandler(startingPosition, newBall);
@@ -65,11 +65,19 @@ namespace TP.ConcurrentProgramming.Data
             }
             else
             {
+                Random random = new Random();
                 for (int i = 0; i < numberOfBalls - sizeOfBallList; i++)
                 {
-                    Vector startingPosition = new(RandomGenerator.Next(100, 400 - 100), RandomGenerator.Next(100, 400 - 100));
-                    Ball newBall = new(startingPosition, startingPosition);
-                    //upperLayerHandler(startingPosition, newBall);
+                    Ball? newBall;
+                    Vector startingPosition;
+                    Vector startingVelocity;
+                    Vector predictDelta = new(0, 0);
+                    do
+                    {
+                        startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
+                        startingVelocity = new((random.NextDouble() - 0.5) * 6, (random.NextDouble() - 0.5) * 6);
+                        newBall = new(startingPosition, startingVelocity);
+                    } while (IsValidMode(startingPosition, newBall) != -1);
                     BallsList.Add(newBall);
                 }
             }
@@ -123,7 +131,7 @@ namespace TP.ConcurrentProgramming.Data
 
         private int IsValidMode(Vector newPosition, Ball currentBall)
         {
-            if((newPosition.x /* - ballDiameter*/ <= 0-margin/2)  | (newPosition.x + ballDiameter >= width - margin*2))
+            if((newPosition.x <= 0-margin/2)  | (newPosition.x + ballDiameter >= width - margin*2))
             {
                 return -2; //ściana po x
             }
@@ -150,16 +158,12 @@ namespace TP.ConcurrentProgramming.Data
 
     private void Move(object? x)
     {
-    // w przypadku dużej ilości kul pozycji bez kolizji może nie istniać i pętla może iść
-    // w nieskończoność. Dlatego wprowadzam limit, żeby nie było stopu całego programu
-    // przez nieskończoną pętlę
             int limit = 50;
             foreach (Ball item in BallsList)
             {
                 int i = 0;
                 while (true)
                 {
-                    //Vector delta = new((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10);
                     Vector delta = (Vector)item.Velocity;
                     Vector newPosition = new(item.PositionValue.x + delta.x, item.PositionValue.y + delta.y);
                     int code_number = IsValidMode(newPosition, item);
@@ -176,11 +180,8 @@ namespace TP.ConcurrentProgramming.Data
                     {
                         item.Velocity = new Vector(item.Velocity.x, -item.Velocity.y);
                     }
-                    else // code_number == [0, .... inf] - uderzenie w kulę. [0, .... inf]
-                    //indeks kuli
+                    else
                     {
-                        //item.Velocity = new Vector(-item.Velocity.x, -item.Velocity.y);
-                        //BallsList[code_number].Velocity = new Vector(-BallsList[code_number].Velocity.x, BallsList[code_number].Velocity.y);
                         Ball A = item;
                         Ball B = BallsList[code_number];
 
