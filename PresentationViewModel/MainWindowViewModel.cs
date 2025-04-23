@@ -37,10 +37,17 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       if (Disposed)
         throw new ObjectDisposedException(nameof(MainWindowViewModel));
       ModelLayer.Start(numberOfBalls);
-      Observer.Dispose();
-    }
+        }
 
-    public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
+    public void UpdateBallsCount(int numberOfBalls)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(MainWindowViewModel));
+            Balls.Clear();
+            ModelLayer.UpdateBallsCount(numberOfBalls);
+        }
+
+        public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
     #endregion public API
 
@@ -79,6 +86,44 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     private ModelAbstractApi ModelLayer;
     private bool Disposed = false;
 
-    #endregion private
-  }
+        #endregion private
+        private int _ballCount = 5;
+        public int BallCount
+        {
+            get => _ballCount;
+            set
+            {
+                _ballCount = value;
+                RaisePropertyChanged(nameof(BallCount));
+                StartCommand.Execute(null);
+            }
+        }
+
+        private RelayCommand _startCommand;
+        public RelayCommand StartCommand
+        {
+            get
+            {
+                return _startCommand ??= new RelayCommand(() =>
+                {
+                    UpdateBallsCount(_ballCount);
+                });
+            }
+        }
+
+        private RelayCommand _stopCommand;
+        public RelayCommand StopCommand
+        {
+            get
+            {
+                return _stopCommand ??= new RelayCommand(() =>
+                {
+                    _ballCount = 0;
+                    RaisePropertyChanged(nameof(BallCount));
+                    UpdateBallsCount(_ballCount);
+                   //Window.Close();
+                });
+            }
+        }
+    }
 }

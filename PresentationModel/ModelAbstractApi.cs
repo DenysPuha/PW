@@ -28,9 +28,10 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     public abstract void Start(int numberOfBalls);
 
-    #region IObservable
+    public abstract void UpdateBallsCount(int numberofBalls);
+        #region IObservable
 
-    public abstract IDisposable Subscribe(IObserver<IBall> observer);
+        public abstract IDisposable Subscribe(IObserver<IBall> observer);
 
     #endregion IObservable
 

@@ -42,11 +42,39 @@ namespace TP.ConcurrentProgramming.Data
       }
     }
 
+    public override void UpdateBallsCount(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
+            int sizeOfBallList = BallsList.Count;
+            if (numberOfBalls < sizeOfBallList)
+            {
+                for(int i = 0; i < sizeOfBallList - numberOfBalls; i++)
+                {
+                    BallsList.RemoveAt(BallsList.Count-1);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < numberOfBalls - sizeOfBallList; i++)
+                {
+                    Vector startingPosition = new(RandomGenerator.Next(100, 400 - 100), RandomGenerator.Next(100, 400 - 100));
+                    Ball newBall = new(startingPosition, startingPosition);
+                    //upperLayerHandler(startingPosition, newBall);
+                    BallsList.Add(newBall);
+                }
+            }
+            for (int i = 0; i < BallsList.Count; i++)
+            {
+                upperLayerHandler(BallsList[i].PositionValue, BallsList[i]);
+            }
+        }
+
     #endregion DataAbstractAPI
 
     #region IDisposable
 
-    protected virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
     {
       if (!Disposed)
       {
