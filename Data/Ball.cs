@@ -30,11 +30,13 @@ namespace TP.ConcurrentProgramming.Data
         // getter for position 
         public IVector PositionValue => Position;
 
-    #endregion IBall
+    public IVector PositionValue => Position;
 
-    #region private
+        #endregion IBall
 
-    private Vector Position;
+        #region private
+
+        private Vector Position;
 
     private void RaiseNewPositionChangeNotification()
     {

@@ -24,6 +24,7 @@ namespace TP.ConcurrentProgramming.Data
     #region public API
 
     public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
+    public abstract void UpdateBallsCount(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
     #endregion public API
 
@@ -31,7 +32,7 @@ namespace TP.ConcurrentProgramming.Data
 
     public abstract void Dispose();
 
-    #endregion IDisposable
+#endregion IDisposable
 
     #region private
 

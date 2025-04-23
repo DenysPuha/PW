@@ -49,11 +49,16 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       layerBellow.Start(numberOfBalls, StartHandler);
     }
 
-    #endregion ModelAbstractApi
+    public override void UpdateBallsCount(int numberofBalls)
+        {
+            layerBellow.UpdateBallsCount(numberofBalls, StartHandler);
+        }
 
-    #region API
+        #endregion ModelAbstractApi
 
-    public event EventHandler<BallChaneEventArgs> BallChanged;
+        #region API
+
+        public event EventHandler<BallChaneEventArgs> BallChanged;
 
     #endregion API
 
@@ -66,7 +71,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
     {
       ModelBall newBall = new ModelBall(position.x, position.y, ball) { Diameter = 20.0 };
-      BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+      BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
     }
 
     #endregion private
