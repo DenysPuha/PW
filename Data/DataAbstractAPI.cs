@@ -26,11 +26,13 @@ namespace TP.ConcurrentProgramming.Data
     public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
     public abstract void UpdateBallsCount(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
-    #endregion public API
+    public abstract void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, IBall> updateBalls);
 
-    #region IDisposable
+        #endregion public API
 
-    public abstract void Dispose();
+        #region IDisposable
+
+        public abstract void Dispose();
 
 #endregion IDisposable
 

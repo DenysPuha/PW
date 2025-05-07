@@ -56,6 +56,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             layerBellow.UpdateBallsCount(numberofBalls, (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall)));
         }
 
+        public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IPosition, IBall> updateBalls)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            if (_upperLayerHandler == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+            if (updateBalls == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+            layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, (width, height) => upperLayerHandler(width, height),
+                (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall)));
+        }
+
         #endregion BusinessLogicAbstractAPI
 
         #region private

@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:TP.ConcurrentProgramming.Presentation.ViewModel;assembly=TP.ConcurrentProgramming.PresentationViewModel"
         mc:Ignorable="d"
-        Title="Presentation layer targeting reactive behaviour" Height="auto" Width="auto">
+        Title="Presentation layer targeting reactive behaviour" Width="{Binding WindowWidth, Mode=TwoWay}"
+    Height="{Binding WindowHeight, Mode=TwoWay}" MinWidth="390" MinHeight="320">
     <Window.DataContext>
         <vm:MainWindowViewModel />
     </Window.DataContext>
@@ -25,7 +26,8 @@
         Command="{Binding StopCommand}" />
         </StackPanel>
 
-        <Border Grid.Row="1" BorderThickness="4" BorderBrush="Green" Height="420" Width="400">
+        <Border Grid.Row="1" BorderThickness="4" BorderBrush="Green" Width="{Binding SquareWidth, Mode=TwoWay}"
+    Height="{Binding SquareHeight, Mode=TwoWay}">
             <ItemsControl ItemsSource="{Binding Balls}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

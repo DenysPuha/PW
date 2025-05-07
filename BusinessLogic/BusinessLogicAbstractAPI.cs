@@ -28,9 +28,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
     public abstract void UpdateBallsCount(int numberofBalls, Action<IPosition, IBall> upperLayerHandler);
 
-    #region IDisposable
+        public abstract void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IPosition, IBall> updateBalls);
 
-    public abstract void Dispose();
+
+        #region IDisposable
+
+        public abstract void Dispose();
 
     #endregion IDisposable
 

@@ -27,6 +27,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     {
       layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetBusinessLogicLayer() : underneathLayer;
       eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+      windowChangedObservable = Observable.FromEventPattern<WindowChangedEventArgs>(this, "WindowChanged");
     }
 
     #region ModelAbstractApi
@@ -44,7 +45,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
     }
 
-    public override void Start(int numberOfBalls)
+    public override IDisposable SubscribeToWindowChanges(IObserver<WindowChangedEventArgs> observer)
+    {
+        return windowChangedObservable.Subscribe(x => observer.OnNext(x.EventArgs), ex => observer.OnError(ex), () => observer.OnCompleted());
+    }
+
+        public override void Start(int numberOfBalls)
     {
       layerBellow.Start(numberOfBalls, StartHandler);
     }
@@ -54,18 +60,26 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             layerBellow.UpdateBallsCount(numberofBalls, StartHandler);
         }
 
+    public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
+        {
+            layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, OnWindowChangedHandler, StartHandler);
+        }
+
+
         #endregion ModelAbstractApi
 
         #region API
 
         public event EventHandler<BallChaneEventArgs> BallChanged;
+        public event EventHandler<WindowChangedEventArgs> WindowChanged;
 
-    #endregion API
+        #endregion API
 
-    #region private
+        #region private
 
-    private bool Disposed = false;
+        private bool Disposed = false;
     private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable = null;
+    private readonly IObservable<EventPattern<WindowChangedEventArgs>> windowChangedObservable = null;
     private readonly UnderneathLayerAPI layerBellow = null;
 
     private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
@@ -74,11 +88,20 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
     }
 
-    #endregion private
+    private void OnWindowChangedHandler(double squareWidth, double squareHeight)
+    {
+        WindowChanged?.Invoke(this, new WindowChangedEventArgs
+        {
+            SquareWidth = squareWidth,
+            SquareHeight = squareHeight
+        });
+    }
 
-    #region TestingInfrastructure
+        #endregion private
 
-    [Conditional("DEBUG")]
+        #region TestingInfrastructure
+
+        [Conditional("DEBUG")]
     internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
     {
       returnInstanceDisposed(Disposed);
@@ -103,4 +126,10 @@ namespace TP.ConcurrentProgramming.Presentation.Model
   {
     public IBall Ball { get; init; }
   }
+
+    public class WindowChangedEventArgs : EventArgs
+    {
+        public double SquareWidth { get; init; }
+        public double SquareHeight { get; init; }
+    }
 }

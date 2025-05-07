@@ -10,6 +10,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -87,9 +88,52 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
-    #endregion DataAbstractAPI
+    public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, IBall> updateBalls)
+    {
+            
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
+            if (upperLayerHandler == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+            if (updateBalls == null)
+                throw new ArgumentNullException(nameof(updateBalls));
+            Boolean isSizeChanged = false;
+            if (windowWidth - squareWidth <= 80)
+            {
+                squareWidth = windowWidth/1.2;
+                squareHeight = squareWidth * 1.05;
+                isSizeChanged = true;
+            }
+            if (windowHeight - squareHeight <= 140) {
+                squareHeight = windowHeight / 1.33;
+                squareWidth = squareHeight / 1.05;
+                isSizeChanged = true;
+            }
+            if (isSizeChanged)
+            {
+                List<Ball> copy = new();
+                foreach (Ball item in BallsList)
+                {
+                    Vector newPosition = new(item.PositionValue.x * squareWidth / width, item.PositionValue.y * squareHeight / height);
+                    Vector newVelocity = (Vector)item.Velocity;
+                    Ball newBall = new(newPosition, newVelocity);
+                    copy.Add(newBall);
+                }
+                BallsList.Clear();
+                BallsList = copy;
+            }
+            foreach (Ball item in BallsList)
+            {
+                updateBalls(item.PositionValue, item);
+            }
+            width = squareWidth;
+            height = squareHeight;
+            upperLayerHandler(width, height);
+        }
 
-    #region IDisposable
+        #endregion DataAbstractAPI
+
+        #region IDisposable
 
         protected virtual void Dispose(bool disposing)
     {
@@ -124,11 +168,12 @@ namespace TP.ConcurrentProgramming.Data
     private Random RandomGenerator = new();
     private List<Ball> BallsList = [];
 
+        private double width = 400.0;
+        private double height = 420.0;
+
         private const int margin = 4;
         private const double ballDiameter = 20.0;
-        private const double width = 400.0;
-        private const double height = 420.0;
-
+        
         private int IsValidMode(Vector newPosition, Ball currentBall)
         {
             if((newPosition.x <= 0-margin/2)  | (newPosition.x + ballDiameter >= width - margin*2))
