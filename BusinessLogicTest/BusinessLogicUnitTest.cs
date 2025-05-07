@@ -76,6 +76,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 throw new NotImplementedException();
             }
+
+            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, Data.IBall> updateBalls)
+            {
+                throw new NotImplementedException();
+            }
         }
 
     private class DataLayerDisposeFixcure : Data.DataAbstractAPI
@@ -96,26 +101,51 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 throw new NotImplementedException();
             }
+
+            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, Data.IBall> updateBalls)
+            {
+                throw new NotImplementedException();
+            }
         }
 
     private class DataLayerStartFixcure : Data.DataAbstractAPI
     {
       internal bool StartCalled = false;
-      internal int NumberOfBallseCreated = -1;
+      internal bool UpdateBallsCountCalled = false;
+    internal bool ChangeWindowSizeCalled = false;
+    internal int NumberOfBallseCreated = -1;
+            internal double WindowWidthCreated = -1;
+            internal double WindowHeightCreated = -1;
+            internal double SquareWidthCreated = -1;
+            internal double SquareHegihtCreated = -1;
 
-      public override void Dispose()
+            public override void Dispose()
       { }
 
       public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
       {
         StartCalled = true;
+                
         NumberOfBallseCreated = numberOfBalls;
         upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
       }
 
             public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
             {
-                throw new NotImplementedException();
+                UpdateBallsCountCalled = true;
+                NumberOfBallseCreated = numberOfBalls;
+                upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
+            }
+
+            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, Data.IBall> updateBalls)
+            {
+                ChangeWindowSizeCalled = true;
+                WindowHeightCreated = windowHeight;
+                WindowWidthCreated = windowWidth;
+                SquareHegihtCreated = squareHeight;
+                SquareWidthCreated = squareWidth;
+                upperLayerHandler(squareWidth, squareHeight);
+                updateBalls(new DataVectorFixture(), new DataBallFixture());
             }
 
             private record DataVectorFixture : Data.IVector

@@ -57,12 +57,16 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
 
       internal bool Disposed = false;
       internal int NumberOfBalls = 0;
+            internal double WindowHeightCreated = 0;
+            internal double WindowWidthCreated = 0;
+            internal double SquareHeightCreated = 0;
+            internal double SquareWidthCreated = 0;
 
-      #endregion testing instrumentation
+            #endregion testing instrumentation
 
-      #region BusinessLogicAbstractAPI
+            #region BusinessLogicAbstractAPI
 
-      public override void Dispose()
+            public override void Dispose()
       {
         Disposed = true;
       }
@@ -75,7 +79,18 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
 
             public override void UpdateBallsCount(int numberofBalls, Action<IPosition, BusinessLogic.IBall> upperLayerHandler)
             {
-                throw new NotImplementedException();
+                NumberOfBalls = numberofBalls;
+                Assert.IsNotNull(upperLayerHandler);
+            }
+
+            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IPosition, BusinessLogic.IBall> updateBalls)
+            {
+                WindowHeightCreated = windowHeight;
+                WindowWidthCreated = windowWidth;
+                SquareHeightCreated = squareHeight;
+                SquareWidthCreated = squareWidth;
+                Assert.IsNotNull(upperLayerHandler);
+                Assert.IsNotNull(updateBalls);
             }
 
             #endregion BusinessLogicAbstractAPI

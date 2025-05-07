@@ -35,7 +35,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Assert.IsNotNull(viewModel.Balls);
         Assert.AreEqual<int>(0, nullModelFixture.Disposed);
         Assert.AreEqual<int>(numberOfBalls, nullModelFixture.Started);
-        Assert.AreEqual<int>(1, nullModelFixture.Subscribed);
+        Assert.AreEqual<int>(2, nullModelFixture.Subscribed);
       }
       Assert.AreEqual<int>(1, nullModelFixture.Disposed);
     }
@@ -65,12 +65,16 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       internal int Disposed = 0;
       internal int Started = 0;
       internal int Subscribed = 0;
+            internal double WindowHeightCreated;
+            internal double WindowWidthCreated;
+            internal double SquareHeightCreated;
+            internal double SquareWidthCreated;
 
-      #endregion Test
+            #endregion Test
 
-      #region ModelAbstractApi
+            #region ModelAbstractApi
 
-      public override void Dispose()
+            public override void Dispose()
       {
         Disposed++;
       }
@@ -80,16 +84,31 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Started = numberOfBalls;
       }
 
-      public override IDisposable Subscribe(IObserver<ModelIBall> observer)
+    public override void UpdateBallsCount(int numberofBalls)
+    {
+        Started = numberofBalls;
+    }
+
+            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
+            {
+                WindowHeightCreated = windowHeight;
+                WindowWidthCreated = windowWidth;
+                SquareHeightCreated = squareHeight;
+                SquareWidthCreated = squareWidth;
+            }
+
+            public override IDisposable Subscribe(IObserver<ModelIBall> observer)
       {
         Subscribed++;
         return new NullDisposable();
       }
 
-            public override void UpdateBallsCount(int numberofBalls)
+            public override IDisposable SubscribeToWindowChanges(IObserver<WindowChangedEventArgs> observer)
             {
-                throw new NotImplementedException();
+                Subscribed++;
+                return new NullDisposable();
             }
+
 
             #endregion ModelAbstractApi
 
@@ -109,6 +128,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       #region Testing indicators
 
       internal bool Disposed = false;
+            internal int NumberOfBalls = 8;
 
       #endregion Testing indicators
 
@@ -117,6 +137,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       public ModelSimulatorFixture()
       {
         eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+        windowChangedObservable = Observable.FromEventPattern<WindowChangedEventArgs>(this, "WindowChanged");
       }
 
       #endregion ctor
@@ -128,7 +149,12 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         return eventObservable?.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
       }
 
-      public override void Start(int numberOfBalls)
+        public override IDisposable? SubscribeToWindowChanges(IObserver<WindowChangedEventArgs> observer)
+        {
+            return windowChangedObservable?.Subscribe(x => observer.OnNext(x.EventArgs), ex => observer.OnError(ex), () => observer.OnCompleted());
+        }
+
+            public override void Start(int numberOfBalls)
       {
         for (int i = 0; i < numberOfBalls; i++)
         {
@@ -137,27 +163,47 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         }
       }
 
-      public override void Dispose()
+            public override void UpdateBallsCount(int numberofBalls)
+            {
+                for (int i = 0; i < numberofBalls; i++)
+                {
+                    ModelBall newBall = new ModelBall(0, 0) { };
+                    BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+                }
+            }
+
+            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
+            {
+                for (int i = 0; i < NumberOfBalls; i++)
+                {
+                    ModelBall newBall = new ModelBall(0, 0) { };
+                    BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+                }
+                WindowChanged?.Invoke(this, new WindowChangedEventArgs
+                {
+                    SquareWidth = squareWidth,
+                    SquareHeight = squareHeight
+                });
+            }
+
+            public override void Dispose()
       {
         Disposed = true;
       }
-
-            public override void UpdateBallsCount(int numberofBalls)
-            {
-                throw new NotImplementedException();
-            }
 
             #endregion ModelAbstractApi
 
             #region API
 
             public event EventHandler<BallChaneEventArgs> BallChanged;
+            public event EventHandler<WindowChangedEventArgs> WindowChanged;
 
-      #endregion API
+            #endregion API
 
-      #region private
+            #region private
 
-      private IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
+            private IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
+      private IObservable<EventPattern<WindowChangedEventArgs>>? windowChangedObservable = null;
 
       private class ModelBall : ModelIBall
       {
