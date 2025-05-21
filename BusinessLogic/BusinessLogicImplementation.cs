@@ -89,38 +89,61 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             //    (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall, this)));
         }
 
-        public override void CheckColision(Data.IBall Item, IPosition Pos)
-        {
-            lock (_lock) { 
-                int indx = -1;
-            IPosition newPos = new Position(Pos.x + Item.Velocity.x, Pos.y + Item.Velocity.y);
-            
-            if ((newPos.x <= 0 - margin / 2) | (newPos.x + ballDiameter >= width - margin*2))
-            {
-                Item.SetVelocity(-Item.Velocity.x, Item.Velocity.y);
-            }
-            else if ((newPos.y <= 0 - margin / 2) | (newPos.y + ballDiameter >= height - margin*2))
-            {
-                Item.SetVelocity(Item.Velocity.x, -Item.Velocity.y);
-            }
-            else
-            {
-                double distance;
-                for (int i = 0; i < _ballList.Count; i++)
-                {
-                    Ball others = _ballList[i];
-                    if (others.PositionValue.x == Pos.x && others.PositionValue.y == Pos.y)
-                    {
-                        continue;
-                    }
+        #endregion BusinessLogicAbstractAPI
 
-                    distance = Math.Sqrt(Math.Pow(others.PositionValue.x - newPos.x, 2) + Math.Pow((others.PositionValue.y - newPos.y), 2));
-                    if (distance <= ballDiameter)
-                    {
-                        indx = _ballList.IndexOf(others);
-                        break;
-                    }
+        #region private
+
+        private readonly object  _lock = new();
+
+        private IDisposable Observer = null;
+        private IDisposable PositionObserver = null;
+
+        private bool Disposed = false;
+
+        private Action<IPosition, IBall>? _upperLayerHandler;
+
+        private readonly UnderneathLayerAPI layerBellow;
+
+        private readonly List<Ball> _ballList = new();
+
+        private int width = 400;
+        private int height = 420;
+        private int margin = 4;
+        private int ballDiameter = 20;
+
+        private void CheckColision(Data.IBall Item, IPosition Pos)
+        {
+            lock (_lock)
+            {
+                int indx = -1;
+                IPosition newPos = new Position(Pos.x + Item.Velocity.x, Pos.y + Item.Velocity.y);
+
+                if ((newPos.x <= 0 - margin / 2) | (newPos.x + ballDiameter >= width - margin * 2))
+                {
+                    Item.SetVelocity(-Item.Velocity.x, Item.Velocity.y);
                 }
+                else if ((newPos.y <= 0 - margin / 2) | (newPos.y + ballDiameter >= height - margin * 2))
+                {
+                    Item.SetVelocity(Item.Velocity.x, -Item.Velocity.y);
+                }
+                else
+                {
+                    double distance;
+                    for (int i = 0; i < _ballList.Count; i++)
+                    {
+                        Ball others = _ballList[i];
+                        if (others.PositionValue.x == Pos.x && others.PositionValue.y == Pos.y)
+                        {
+                            continue;
+                        }
+
+                        distance = Math.Sqrt(Math.Pow(others.PositionValue.x - newPos.x, 2) + Math.Pow((others.PositionValue.y - newPos.y), 2));
+                        if (distance <= ballDiameter)
+                        {
+                            indx = _ballList.IndexOf(others);
+                            break;
+                        }
+                    }
                     if (indx == -1) return;
                     else
                     {
@@ -144,31 +167,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                         Item.SetVelocity(Item.Velocity.x - impulse * nx, Item.Velocity.y - impulse * ny);
                         B.setVelocity(velB.x + impulse * nx, velB.y + impulse * ny);
                     }
-            }
+                }
             }
         }
-
-        #endregion BusinessLogicAbstractAPI
-
-        #region private
-
-        private readonly object  _lock = new();
-
-        private IDisposable Observer = null;
-        private IDisposable PositionObserver = null;
-
-        private bool Disposed = false;
-
-        private Action<IPosition, IBall>? _upperLayerHandler;
-
-        private readonly UnderneathLayerAPI layerBellow;
-
-        private readonly List<Ball> _ballList = new();
-
-        private int width = 400;
-        private int height = 420;
-        private int margin = 4;
-        private int ballDiameter = 20;
 
         public bool IsValidPosition(IPosition position)
         {

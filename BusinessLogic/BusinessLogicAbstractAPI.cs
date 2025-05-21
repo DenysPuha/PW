@@ -32,7 +32,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public abstract void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IPosition, IBall> updateBalls);
 
-        public abstract void CheckColision(Data.IBall Item, IPosition Pos);
+        //public abstract void CheckColision(Data.IBall Item, IPosition Pos);
 
         
 

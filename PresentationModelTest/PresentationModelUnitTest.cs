@@ -53,9 +53,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
 
     private class UnderneathLayerFixture : BusinessLogicAbstractAPI
     {
-      #region testing instrumentation
+            #region testing instrumentation
 
-      internal bool Disposed = false;
+            internal bool Disposed = false;
       internal int NumberOfBalls = 0;
             internal double WindowHeightCreated = 0;
             internal double WindowWidthCreated = 0;

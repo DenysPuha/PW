@@ -8,6 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Reactive;
 using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic.Test
@@ -66,10 +67,22 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     {
       public override void Dispose()
       { }
+            public bool Disposed = false;
+            public bool SetPositionValidatorCalled = false;
+            public Func<IVector, bool> SetPositionValidatorFunc = null;
+            public override void SetPositionValidator(Func<IVector, bool> validator)
+            {
+                SetPositionValidatorCalled = true;
+                SetPositionValidatorFunc = validator;
+            }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
+            {
+                return new AnonymousObserver<BallChaneEventArgs>(x => { });
+            }
+            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
       {
-        throw new NotImplementedException();
+       
       }
 
             public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
@@ -92,7 +105,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         Disposed = true;
       }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
+            {
+                return new AnonymousObserver<BallChaneEventArgs>(x => { });
+            }
+            public bool SetPositionValidatorCalled = false;
+            public Func<IVector, bool> SetPositionValidatorFunc = null;
+            public override void SetPositionValidator(Func<IVector, bool> validator)
+            {
+                SetPositionValidatorCalled = true;
+                SetPositionValidatorFunc = validator;
+            }
+            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
       {
         throw new NotImplementedException();
       }
@@ -121,8 +145,17 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
             public override void Dispose()
       { }
+            public bool Disposed = false;
+            public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
+            {
+                return new AnonymousObserver<BallChaneEventArgs>(x => { });
+            }
+            public override void SetPositionValidator(Func<IVector, bool> validator)
+            {
+                
+            }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
       {
         StartCalled = true;
                 
@@ -157,8 +190,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       private class DataBallFixture : Data.IBall
       {
         public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                public IVector PositionValue => new DataVectorFixture();
+                public void SetVelocity(double x, double y) { }
 
-        public event EventHandler<IVector>? NewPositionNotification = null;
+                public event EventHandler<IVector>? NewPositionNotification = null;
       }
     }
 
