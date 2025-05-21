@@ -34,6 +34,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public abstract void CheckColision(Data.IBall Item, IPosition Pos);
 
+        
+
         #region IDisposable
 
         public abstract void Dispose();

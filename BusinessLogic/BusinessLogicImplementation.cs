@@ -9,6 +9,7 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System;
+using System.Threading;
 using System.Diagnostics;
 using System.Numerics;
 using System.Reactive;
@@ -28,6 +29,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
     {
       layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+            layerBellow.SetPositionValidator(pos => IsValidPosition(new Position(pos.x, pos.y)));
+
             Observer = layerBellow.Subscribe(new AnonymousObserver<BallChaneEventArgs>(x => CheckColision(x.Ball, new Position(x.Pos.x, x.Pos.y))));
         }
 
@@ -88,7 +91,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public override void CheckColision(Data.IBall Item, IPosition Pos)
         {
-            int indx = -1;
+            lock (_lock) { 
+                int indx = -1;
             IPosition newPos = new Position(Pos.x + Item.Velocity.x, Pos.y + Item.Velocity.y);
             
             if ((newPos.x <= 0 - margin / 2) | (newPos.x + ballDiameter >= width - margin*2))
@@ -141,11 +145,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                         B.setVelocity(velB.x + impulse * nx, velB.y + impulse * ny);
                     }
             }
+            }
         }
 
         #endregion BusinessLogicAbstractAPI
 
         #region private
+
+        private readonly object  _lock = new();
 
         private IDisposable Observer = null;
         private IDisposable PositionObserver = null;
@@ -163,12 +170,28 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private int margin = 4;
         private int ballDiameter = 20;
 
+        public bool IsValidPosition(IPosition position)
+        {
+            foreach (var ball in _ballList)
+            {
+                double dx = ball.PositionValue.x - position.x;
+                double dy = ball.PositionValue.y - position.y;
+                double distance = Math.Sqrt(dx * dx + dy * dy);
 
-#endregion private
+                if (distance <= ballDiameter)
+                    return false;
+            }
 
-#region TestingInfrastructure
+            return position.x >= 0 && position.x + ballDiameter <= width - margin &&
+                   position.y >= 0 && position.y + ballDiameter <= height - margin;
+        }
 
-[Conditional("DEBUG")]
+
+        #endregion private
+
+        #region TestingInfrastructure
+
+        [Conditional("DEBUG")]
     internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
     {
       returnInstanceDisposed(Disposed);

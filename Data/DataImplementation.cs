@@ -23,7 +23,6 @@ namespace TP.ConcurrentProgramming.Data
     public DataImplementation()
     {
             eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
-            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(20)); // Timer - 100 bylo
     }
 
         #endregion ctor
@@ -52,8 +51,8 @@ namespace TP.ConcurrentProgramming.Data
                 {
                     startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                     startingVelocity = new((random.NextDouble() - 0.5) * 6, (random.NextDouble() - 0.5) * 6);
-                    newBall = new(startingPosition, startingVelocity);
-                } while (IsValidMode(startingPosition, newBall) != -1);
+                    newBall = new(startingPosition, startingVelocity, checkColisionHandler);
+                } while (isValidPosition != null && !isValidPosition(startingPosition));
 
                 upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
@@ -85,8 +84,8 @@ namespace TP.ConcurrentProgramming.Data
                     {
                         startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                         startingVelocity = new((random.NextDouble() - 0.5) * 6, (random.NextDouble() - 0.5) * 6);
-                        newBall = new(startingPosition, startingVelocity);
-                    } while (IsValidMode(startingPosition, newBall) != -1);
+                        newBall = new(startingPosition, startingVelocity, checkColisionHandler);
+                    } while (isValidPosition != null && !isValidPosition(startingPosition));
                     BallsList.Add(newBall);
                 }
             }
@@ -141,6 +140,12 @@ namespace TP.ConcurrentProgramming.Data
 
         public event EventHandler<BallChaneEventArgs>? BallChanged;
 
+        
+        public override void SetPositionValidator(Func<IVector, bool> validator)
+        {
+            isValidPosition = validator;
+        }
+
         #endregion DataAbstractAPI
 
         #region IDisposable
@@ -151,7 +156,6 @@ namespace TP.ConcurrentProgramming.Data
       {
         if (disposing)
         {
-          MoveTimer.Dispose();
           BallsList.Clear();
         }
         Disposed = true;
@@ -175,54 +179,13 @@ namespace TP.ConcurrentProgramming.Data
         private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable;
         private bool Disposed = false;
 
-    private readonly Timer MoveTimer;
     private Random RandomGenerator = new();
     private List<Ball> BallsList = [];
-
-        private double width = 400.0;
-        private double height = 420.0;
-
-        private const int margin = 4;
-        private const double ballDiameter = 20.0;
-
-        private int IsValidMode(Vector newPosition, Ball currentBall)
+        private Func<IVector, bool>? isValidPosition;
+        private void checkColisionHandler(IBall Ball, IVector Pos)
         {
-            if ((newPosition.x <= 0 - margin / 2) | (newPosition.x + ballDiameter >= width - margin * 2))
-            {
-                return -2; //ściana po x
-            }
-            else if ((newPosition.y <= 0 - margin / 2) | (newPosition.y + ballDiameter >= height - margin * 2))
-            {
-                return -3; //ściana po y
-            }
-            else
-            {
-                foreach (Ball others in BallsList)
-                {
-                    if (others == currentBall)
-                        continue;
-                    double distance = Math.Sqrt(Math.Pow((others.PositionValue.x - newPosition.x), 2) + Math.Pow((others.PositionValue.y - newPosition.y), 2));
-                    if (distance <= ballDiameter)
-                    {
-                        return BallsList.IndexOf(others); //indeks elementu, z którym
-                                                          //zderza się bieżąca kula
-                    }
-                }
-            }
-            return -1; //wszystko ok
+            BallChanged?.Invoke(this, new BallChaneEventArgs { Ball = Ball, Pos = Pos });
         }
-
-        private void Move(object? x)
-    {
-            for (int i = 0; i < BallsList.Count; i++)
-            {
-                Ball item = BallsList[i];
-                BallChanged?.Invoke(this, new BallChaneEventArgs { Ball = item , Pos = item.PositionValue});
-                Vector delta = (Vector)item.Velocity;
-                item.Move(delta);
-            }
-   
-    }
 
     #endregion private
 

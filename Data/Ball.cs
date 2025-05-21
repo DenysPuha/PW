@@ -8,21 +8,36 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
 namespace TP.ConcurrentProgramming.Data
 {
   internal class Ball : IBall
   {
     #region ctor
 
-    internal Ball(Vector initialPosition, Vector initialVelocity)
+    internal Ball(Vector initialPosition, Vector initialVelocity, Action<IBall, IVector> checkColision)
     {
       Position = initialPosition;
       Velocity = initialVelocity;
+            _checkColision = checkColision;
+
+            _thread = new Thread(MoveLoop);
+            _thread.IsBackground = true;
+            _thread.Start();
     }
 
     #endregion ctor
 
     #region IBall
+
+        public void Stop()
+        {
+            _running = false;
+            _thread.Join();
+        }
+
 
     public event EventHandler<IVector>? NewPositionNotification;
 
@@ -38,14 +53,26 @@ namespace TP.ConcurrentProgramming.Data
 
         #region private
 
+        private Thread _thread;
+        private volatile bool _running = true;
+
+        private readonly Action<IBall, IVector> _checkColision;
+
         private Vector Position;
 
     private void RaiseNewPositionChangeNotification()
     {
       NewPositionNotification?.Invoke(this, Position);
     }
+        private void MoveLoop() {
+            while(_running){
+                _checkColision(this, Position);
+                Move(new Vector(Velocity.x/ Math.Abs(Velocity.x), Velocity.y / Math.Abs(Velocity.y)));
+                Thread.Sleep((int)(20/ Math.Sqrt(Velocity.x*Velocity.x+Velocity.y*Velocity.y)));
+            }
+         }
 
-    internal void Move(Vector delta)
+    private void Move(Vector delta)
     {
       Position = new Vector(Position.x + delta.x, Position.y + delta.y);
       RaiseNewPositionChangeNotification();
