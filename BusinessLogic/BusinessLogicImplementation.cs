@@ -56,7 +56,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _upperLayerHandler = upperLayerHandler;
      
       layerBellow.Start(numberOfBalls, (startingPosition, databall) => {
-          Ball buf = new Ball(databall, startingPosition);
+          Ball buf = new Ball(databall, new Position (startingPosition.x, startingPosition.y));
           _ballList.Add(buf);
           upperLayerHandler(new Position(startingPosition.x, startingPosition.y), buf);
       });
@@ -71,22 +71,24 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _ballList.Clear();
             layerBellow.UpdateBallsCount(numberofBalls, (startingPosition, databall) =>
             {
-                Ball buf = new Ball(databall, startingPosition);
+                Ball buf = new Ball(databall, new Position(startingPosition.x, startingPosition.y));
                 _ballList.Add(buf);
-                _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall, startingPosition));
+                _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall, new Position(startingPosition.x, startingPosition.y)));
             });
         }
 
         public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IPosition, IBall> updateBalls)
         {
-            //if (Disposed)
-            //    throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-            //if (_upperLayerHandler == null)
-            //    throw new ArgumentNullException(nameof(upperLayerHandler));
-            //if (updateBalls == null)
-            //    throw new ArgumentNullException(nameof(upperLayerHandler));
-            //layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, (width, height) => upperLayerHandler(width, height),
-            //    (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall, this)));
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            if (_upperLayerHandler == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+            if (updateBalls == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+            width = squareWidth;
+            height = squareHeight;
+            layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, (width, height) => upperLayerHandler(width, height),
+                (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall, new Position(startingPosition.x, startingPosition.y))));
         }
 
         #endregion BusinessLogicAbstractAPI
@@ -106,8 +108,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private readonly List<Ball> _ballList = new();
 
-        private int width = 400;
-        private int height = 420;
+        private double width = 400;
+        private double height = 420;
         private int margin = 4;
         private int ballDiameter = 20;
 
@@ -149,7 +151,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                     {
                         Ball B = _ballList[indx];
 
-                        IVector posB = B.PositionValue;
+                        IPosition posB = B.PositionValue;
                         IVector velB = B.Velocity;
 
                         double dx = Pos.x - posB.x;

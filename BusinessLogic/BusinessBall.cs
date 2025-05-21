@@ -15,7 +15,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 {
   internal class Ball : IBall
   {
-    public Ball(Data.IBall ball, IVector position)
+    public Ball(Data.IBall ball, IPosition position)
     {
       _dataBall = ball;
       Pos = position;
@@ -26,7 +26,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     public event EventHandler<IPosition>? NewPositionNotification;
 
-        public IVector PositionValue => Pos;
+        public IPosition PositionValue => Pos;
 
         public IVector Velocity => _dataBall.Velocity;
 
@@ -41,11 +41,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private readonly Data.IBall _dataBall;
 
-        private IVector Pos;
+        private IPosition Pos;
 
         private void RaisePositionChangeEvent(object? sender, Data.IVector e)
     {
-            Pos = e;
+            Pos = new Position(e.x, e.y);
       NewPositionNotification?.Invoke(this, new Position(e.x, e.y));
     }
 
