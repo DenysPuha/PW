@@ -26,9 +26,15 @@ namespace TP.ConcurrentProgramming.Data
     public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
     public abstract void UpdateBallsCount(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
-    public abstract void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, IBall> updateBalls);
+        public abstract void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, IBall> updateBalls);
 
         #endregion public API
+
+        #region IObservable
+
+        public abstract IDisposable Subscribe(IObserver<BallChaneEventArgs> observer);
+
+        #endregion IObservable
 
         #region IDisposable
 
@@ -60,6 +66,7 @@ namespace TP.ConcurrentProgramming.Data
   {
     event EventHandler<IVector> NewPositionNotification;
 
-    IVector Velocity { get; set; }
+        void SetVelocity(double x, double y); 
+    IVector Velocity { get;}
   }
 }

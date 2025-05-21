@@ -62,7 +62,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
         {
-            layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, OnWindowChangedHandler, StartHandler);
+            //layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, OnWindowChangedHandler, StartHandler);
         }
 
 

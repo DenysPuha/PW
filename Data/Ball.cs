@@ -26,7 +26,12 @@ namespace TP.ConcurrentProgramming.Data
 
     public event EventHandler<IVector>? NewPositionNotification;
 
-    public IVector Velocity { get; set; }
+        public void SetVelocity(double x, double y)
+        {
+            Velocity = new Vector(x, y);
+        }
+
+        public IVector Velocity { get; set; }
     public IVector PositionValue => Position;
 
         #endregion IBall

@@ -56,10 +56,10 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     public void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
         {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(MainWindowViewModel));
-            Balls.Clear();
-            ModelLayer.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight);
+            //if (Disposed)
+            //    throw new ObjectDisposedException(nameof(MainWindowViewModel));
+            //Balls.Clear();
+            //ModelLayer.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight);
         }
 
         public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();

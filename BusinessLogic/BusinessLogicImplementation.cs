@@ -8,13 +8,18 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System;
 using System.Diagnostics;
+using System.Numerics;
+using System.Reactive;
+using System.Runtime.InteropServices;
+using TP.ConcurrentProgramming.Data;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
   internal class BusinessLogicImplementation : BusinessLogicAbstractAPI
-  {
+    {
     #region ctor
 
     public BusinessLogicImplementation() : this(null)
@@ -23,7 +28,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
     {
       layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
-    }
+            Observer = layerBellow.Subscribe(new AnonymousObserver<BallChaneEventArgs>(x => CheckColision(x.Ball, new Position(x.Pos.x, x.Pos.y))));
+        }
 
     #endregion ctor
 
@@ -37,6 +43,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       Disposed = true;
     }
 
+
     public override void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler)
     {
       if (Disposed)
@@ -44,33 +51,104 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       if (upperLayerHandler == null)
         throw new ArgumentNullException(nameof(upperLayerHandler));
             _upperLayerHandler = upperLayerHandler;
-      layerBellow.Start(numberOfBalls, (startingPosition, databall) => upperLayerHandler(new Position(startingPosition.x, startingPosition.x), new Ball(databall)));
+     
+      layerBellow.Start(numberOfBalls, (startingPosition, databall) => {
+          Ball buf = new Ball(databall, startingPosition);
+          _ballList.Add(buf);
+          upperLayerHandler(new Position(startingPosition.x, startingPosition.y), buf);
+      });
     }
 
-    public override void UpdateBallsCount(int numberofBalls, Action<IPosition, IBall> upperLayerHandler)
+        public override void UpdateBallsCount(int numberofBalls, Action<IPosition, IBall> upperLayerHandler)
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
             if (_upperLayerHandler == null)
                 throw new ArgumentNullException(nameof(upperLayerHandler));
-            layerBellow.UpdateBallsCount(numberofBalls, (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall)));
+            _ballList.Clear();
+            layerBellow.UpdateBallsCount(numberofBalls, (startingPosition, databall) =>
+            {
+                Ball buf = new Ball(databall, startingPosition);
+                _ballList.Add(buf);
+                _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall, startingPosition));
+            });
         }
 
         public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IPosition, IBall> updateBalls)
         {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-            if (_upperLayerHandler == null)
-                throw new ArgumentNullException(nameof(upperLayerHandler));
-            if (updateBalls == null)
-                throw new ArgumentNullException(nameof(upperLayerHandler));
-            layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, (width, height) => upperLayerHandler(width, height),
-                (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall)));
+            //if (Disposed)
+            //    throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            //if (_upperLayerHandler == null)
+            //    throw new ArgumentNullException(nameof(upperLayerHandler));
+            //if (updateBalls == null)
+            //    throw new ArgumentNullException(nameof(upperLayerHandler));
+            //layerBellow.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight, (width, height) => upperLayerHandler(width, height),
+            //    (startingPosition, databall) => _upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall, this)));
+        }
+
+        public override void CheckColision(Data.IBall Item, IPosition Pos)
+        {
+            int indx = -1;
+            IPosition newPos = new Position(Pos.x + Item.Velocity.x, Pos.y + Item.Velocity.y);
+            
+            if ((newPos.x <= 0 - margin / 2) | (newPos.x + ballDiameter >= width - margin*2))
+            {
+                Item.SetVelocity(-Item.Velocity.x, Item.Velocity.y);
+            }
+            else if ((newPos.y <= 0 - margin / 2) | (newPos.y + ballDiameter >= height - margin*2))
+            {
+                Item.SetVelocity(Item.Velocity.x, -Item.Velocity.y);
+            }
+            else
+            {
+                double distance;
+                for (int i = 0; i < _ballList.Count; i++)
+                {
+                    Ball others = _ballList[i];
+                    if (others.PositionValue.x == Pos.x && others.PositionValue.y == Pos.y)
+                    {
+                        continue;
+                    }
+
+                    distance = Math.Sqrt(Math.Pow(others.PositionValue.x - newPos.x, 2) + Math.Pow((others.PositionValue.y - newPos.y), 2));
+                    if (distance <= ballDiameter)
+                    {
+                        indx = _ballList.IndexOf(others);
+                        break;
+                    }
+                }
+                    if (indx == -1) return;
+                    else
+                    {
+                        Ball B = _ballList[indx];
+
+                        IVector posB = B.PositionValue;
+                        IVector velB = B.Velocity;
+
+                        double dx = Pos.x - posB.x;
+                        double dy = Pos.y - posB.y;
+                        distance = Math.Sqrt(dx * dx + dy * dy);
+                        if (distance == 0) distance = 0.01;
+
+                        double nx = dx / distance;
+                        double ny = dy / distance;
+
+                        double vA_proj = Item.Velocity.x * nx + Item.Velocity.y * ny;
+                        double vB_proj = velB.x * nx + velB.y * ny;
+                        double impulse = vA_proj - vB_proj;
+
+                        Item.SetVelocity(Item.Velocity.x - impulse * nx, Item.Velocity.y - impulse * ny);
+                        B.setVelocity(velB.x + impulse * nx, velB.y + impulse * ny);
+                    }
+            }
         }
 
         #endregion BusinessLogicAbstractAPI
 
         #region private
+
+        private IDisposable Observer = null;
+        private IDisposable PositionObserver = null;
 
         private bool Disposed = false;
 
@@ -78,11 +156,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private readonly UnderneathLayerAPI layerBellow;
 
-    #endregion private
+        private readonly List<Ball> _ballList = new();
 
-    #region TestingInfrastructure
+        private int width = 400;
+        private int height = 420;
+        private int margin = 4;
+        private int ballDiameter = 20;
 
-    [Conditional("DEBUG")]
+
+#endregion private
+
+#region TestingInfrastructure
+
+[Conditional("DEBUG")]
     internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
     {
       returnInstanceDisposed(Disposed);

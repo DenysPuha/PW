@@ -11,6 +11,8 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using System.Reactive;
+using System.Reactive.Linq;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -20,14 +22,20 @@ namespace TP.ConcurrentProgramming.Data
 
     public DataImplementation()
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(20)); // Timer - 100 bylo
+            eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(20)); // Timer - 100 bylo
     }
 
-    #endregion ctor
+        #endregion ctor
 
-    #region DataAbstractAPI
+        #region DataAbstractAPI
 
-    public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
+        public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
+        {
+            return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs), ex => observer.OnError(ex), () => observer.OnCompleted());
+        }
+
+        public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(DataImplementation));
@@ -45,9 +53,9 @@ namespace TP.ConcurrentProgramming.Data
                     startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                     startingVelocity = new((random.NextDouble() - 0.5) * 6, (random.NextDouble() - 0.5) * 6);
                     newBall = new(startingPosition, startingVelocity);
-                } while (IsValidMode(startingPosition, newBall)!=-1);
-        
-        upperLayerHandler(startingPosition, newBall);
+                } while (IsValidMode(startingPosition, newBall) != -1);
+
+                upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
     }
@@ -91,45 +99,47 @@ namespace TP.ConcurrentProgramming.Data
     public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, IBall> updateBalls)
     {
             
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(DataImplementation));
-            if (upperLayerHandler == null)
-                throw new ArgumentNullException(nameof(upperLayerHandler));
-            if (updateBalls == null)
-                throw new ArgumentNullException(nameof(updateBalls));
-            Boolean isSizeChanged = false;
-            if (windowWidth - squareWidth <= 80)
-            {
-                squareWidth = windowWidth/1.2;
-                squareHeight = squareWidth * 1.05;
-                isSizeChanged = true;
-            }
-            if (windowHeight - squareHeight <= 140) {
-                squareHeight = windowHeight / 1.33;
-                squareWidth = squareHeight / 1.05;
-                isSizeChanged = true;
-            }
-            if (isSizeChanged)
-            {
-                List<Ball> copy = new();
-                foreach (Ball item in BallsList)
-                {
-                    Vector newPosition = new(item.PositionValue.x * squareWidth / width, item.PositionValue.y * squareHeight / height);
-                    Vector newVelocity = (Vector)item.Velocity;
-                    Ball newBall = new(newPosition, newVelocity);
-                    copy.Add(newBall);
-                }
-                BallsList.Clear();
-                BallsList = copy;
-            }
-            foreach (Ball item in BallsList)
-            {
-                updateBalls(item.PositionValue, item);
-            }
-            width = squareWidth;
-            height = squareHeight;
-            upperLayerHandler(width, height);
+            //if (Disposed)
+            //    throw new ObjectDisposedException(nameof(DataImplementation));
+            //if (upperLayerHandler == null)
+            //    throw new ArgumentNullException(nameof(upperLayerHandler));
+            //if (updateBalls == null)
+            //    throw new ArgumentNullException(nameof(updateBalls));
+            //Boolean isSizeChanged = false;
+            //if (windowWidth - squareWidth <= 80)
+            //{
+            //    squareWidth = windowWidth/1.2;
+            //    squareHeight = squareWidth * 1.05;
+            //    isSizeChanged = true;
+            //}
+            //if (windowHeight - squareHeight <= 140) {
+            //    squareHeight = windowHeight / 1.33;
+            //    squareWidth = squareHeight / 1.05;
+            //    isSizeChanged = true;
+            //}
+            //if (isSizeChanged)
+            //{
+            //    List<Ball> copy = new();
+            //    foreach (Ball item in BallsList)
+            //    {
+            //        Vector newPosition = new(item.PositionValue.x * squareWidth / width, item.PositionValue.y * squareHeight / height);
+            //        Vector newVelocity = (Vector)item.Velocity;
+            //        Ball newBall = new(newPosition, newVelocity);
+            //        copy.Add(newBall);
+            //    }
+            //    BallsList.Clear();
+            //    BallsList = copy;
+            //}
+            //foreach (Ball item in BallsList)
+            //{
+            //    updateBalls(item.PositionValue, item);
+            //}
+            //width = squareWidth;
+            //height = squareHeight;
+            //upperLayerHandler(width, height);
         }
+
+        public event EventHandler<BallChaneEventArgs>? BallChanged;
 
         #endregion DataAbstractAPI
 
@@ -157,12 +167,13 @@ namespace TP.ConcurrentProgramming.Data
       GC.SuppressFinalize(this);
     }
 
-    #endregion IDisposable
+        #endregion IDisposable
 
-    #region private
+        #region private
 
-    //private bool disposedValue;
-    private bool Disposed = false;
+        //private bool disposedValue;
+        private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable;
+        private bool Disposed = false;
 
     private readonly Timer MoveTimer;
     private Random RandomGenerator = new();
@@ -173,14 +184,14 @@ namespace TP.ConcurrentProgramming.Data
 
         private const int margin = 4;
         private const double ballDiameter = 20.0;
-        
+
         private int IsValidMode(Vector newPosition, Ball currentBall)
         {
-            if((newPosition.x <= 0-margin/2)  | (newPosition.x + ballDiameter >= width - margin*2))
+            if ((newPosition.x <= 0 - margin / 2) | (newPosition.x + ballDiameter >= width - margin * 2))
             {
                 return -2; //ściana po x
             }
-            else if((newPosition.y <= 0 - margin / 2) | (newPosition.y + ballDiameter >= height - margin * 2))
+            else if ((newPosition.y <= 0 - margin / 2) | (newPosition.y + ballDiameter >= height - margin * 2))
             {
                 return -3; //ściana po y
             }
@@ -201,71 +212,16 @@ namespace TP.ConcurrentProgramming.Data
             return -1; //wszystko ok
         }
 
-    private void Move(object? x)
+        private void Move(object? x)
     {
-            int limit = 50;
-            foreach (Ball item in BallsList)
+            for (int i = 0; i < BallsList.Count; i++)
             {
-                int i = 0;
-                while (true)
-                {
-                    Vector delta = (Vector)item.Velocity;
-                    Vector newPosition = new(item.PositionValue.x + delta.x, item.PositionValue.y + delta.y);
-                    int code_number = IsValidMode(newPosition, item);
-                    if (code_number==-1)
-                    {
-                        item.Move(delta);
-                        break;
-                    }
-                    else if(code_number==-2) //ściane boczna 
-                    {
-                        item.Velocity = new Vector(-item.Velocity.x, item.Velocity.y);
-                    }
-                    else if(code_number == -3)
-                    {
-                        item.Velocity = new Vector(item.Velocity.x, -item.Velocity.y);
-                    }
-                    else
-                    {
-                        Ball A = item;
-                        Ball B = BallsList[code_number];
-
-
-                        Vector posA = (Vector)A.PositionValue;
-                        Vector posB = (Vector)B.PositionValue;
-                        Vector velA = (Vector)A.Velocity;
-                        Vector velB = (Vector)B.Velocity;
-
-                        double dx = posA.x - posB.x;
-                        double dy = posA.y - posB.y;
-                        double distance = Math.Sqrt(dx * dx + dy * dy);
-                        if (distance == 0) distance = 0.01;
-
-                        double nx = dx / distance;
-                        double ny = dy / distance;
-
-                        double vA_proj = velA.x * nx + velA.y * ny;
-                        double vB_proj = velB.x * nx + velB.y * ny;
-                        double impulse = vA_proj - vB_proj;
-
-                        A.Velocity = new Vector(
-    velA.x - impulse * nx,
-    velA.y - impulse * ny
-);
-
-                        B.Velocity = new Vector(
-                            velB.x + impulse * nx,
-                            velB.y + impulse * ny
-                        );
-
-                    }
-
-                    if (i == limit)
-                        break;
-                    i++;
-                }
+                Ball item = BallsList[i];
+                BallChanged?.Invoke(this, new BallChaneEventArgs { Ball = item , Pos = item.PositionValue});
+                Vector delta = (Vector)item.Velocity;
+                item.Move(delta);
             }
-       
+   
     }
 
     #endregion private
@@ -292,4 +248,11 @@ namespace TP.ConcurrentProgramming.Data
 
     #endregion TestingInfrastructure
   }
+    public class BallChaneEventArgs : EventArgs
+    {
+        public IBall Ball { get; init; }
+
+        public IVector Pos {get; init;}
+    }
+
 }
