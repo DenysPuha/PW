@@ -23,7 +23,8 @@ namespace TP.ConcurrentProgramming.Data
       Velocity = initialVelocity;
             _checkColision = checkColision;
 
-            _thread = new Thread(MoveLoop);
+            ThreadStart ts = new ThreadStart(MoveLoop);
+            _thread = new System.Threading.Thread(ts);
             _thread.IsBackground = true;
             _thread.Start();
     }
@@ -43,15 +44,19 @@ namespace TP.ConcurrentProgramming.Data
 
         public void SetVelocity(double x, double y)
         {
-            Velocity = new Vector(x, y);
+            lock(_lock)
+            {
+                Velocity = new Vector(x, y);
+            }
         }
 
         public IVector Velocity { get; set; }
-    public IVector PositionValue => Position;
+        public IVector PositionValue => Position;
 
         #endregion IBall
 
         #region private
+        private readonly object _lock = new();
 
         private Thread _thread;
         private volatile bool _running = true;
@@ -74,9 +79,12 @@ namespace TP.ConcurrentProgramming.Data
 
     private void Move(Vector delta)
     {
-      Position = new Vector(Position.x + delta.x, Position.y + delta.y);
-      RaiseNewPositionChangeNotification();
-    }
+            lock(_lock)
+            {
+                Position = new Vector(Position.x + delta.x, Position.y + delta.y);  
+            }
+            RaiseNewPositionChangeNotification();
+        }
 
     #endregion private
   }
