@@ -31,7 +31,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
             layerBellow.SetPositionValidator(pos => IsValidPosition(new Position(pos.x, pos.y)));
 
-            Observer = layerBellow.Subscribe(new AnonymousObserver<BallChaneEventArgs>(x => CheckColision(x.Ball, new Position(x.Pos.x, x.Pos.y))));
+            Observer = layerBellow.Subscribe(new AnonymousObserver<BallChaneEventArgs>(x => CheckColision(x.Ball, new Position(x.Pos.x, x.Pos.y), x.refreshTime)));
         }
 
     #endregion ctor
@@ -97,8 +97,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private readonly object  _lock = new();
 
-        private IDisposable Observer = null;
-        private IDisposable PositionObserver = null;
+        private IDisposable Observer;
+        private IDisposable PositionObserver;
 
         private bool Disposed = false;
 
@@ -113,12 +113,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private int margin = 4;
         private int ballDiameter = 20;
 
-        private void CheckColision(Data.IBall Item, IPosition Pos)
+        private void CheckColision(Data.IBall Item, IPosition Pos, double refreshTime)
         {
             lock (_lock)
             {
                 int indx = -1;
-                IPosition newPos = new Position(Pos.x + Item.Velocity.x, Pos.y + Item.Velocity.y);
+                IPosition newPos = new Position(Pos.x + Item.Velocity.x*refreshTime, Pos.y + Item.Velocity.y*refreshTime);
 
                 if ((newPos.x <= 0 - margin / 2) | (newPos.x + ballDiameter >= width - margin * 2))
                 {
@@ -185,8 +185,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                     return false;
             }
 
-            return position.x >= 0 && position.x + ballDiameter <= width - margin &&
-                   position.y >= 0 && position.y + ballDiameter <= height - margin;
+            return position.x >= 0+margin && position.x + ballDiameter <= width - margin &&
+                   position.y >= 0+margin && position.y + ballDiameter <= height - margin;
         }
 
 

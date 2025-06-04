@@ -17,16 +17,20 @@ namespace TP.ConcurrentProgramming.Data.Test
     public void ConstructorTestMethod()
     {
       Vector testinVector = new Vector(0.0, 0.0);
-        Action<IBall, IVector> checkColision = (ball, position) => { Assert.IsNotNull(ball); Assert.IsNotNull(position); };
-        Ball newInstance = new(testinVector, testinVector, checkColision);
+        Logger log = new();
+        Action<IBall, IVector, double> checkColision = (ball, position, refreshTime) => { Assert.IsNotNull(ball); Assert.IsNotNull(position); Assert.IsNotNull(refreshTime); };
+            
+        Ball newInstance = new(testinVector, testinVector, checkColision, log);
     }
 
     [TestMethod]
     public void MoveTestMethod()
     {
       Vector initialPosition = new(0.0, 0.0);
-            Action<IBall, IVector> checkColision = (ball, position) => { Assert.IsNotNull(ball); Assert.IsNotNull(position); };
-            Ball newInstance = new(initialPosition, new Vector(0.0, 0.0), checkColision);
+            Logger log = new();
+            Action<IBall, IVector, double> checkColision = (ball, position, refreshTime) => { Assert.IsNotNull(ball); Assert.IsNotNull(position); Assert.IsNotNull(refreshTime); };
+
+            Ball newInstance = new(initialPosition, new Vector(0.0, 0.0), checkColision, log);
       IVector curentPosition = new Vector(0.0, 0.0);
       int numberOfCallBackCalled = 0;
       newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); curentPosition = position; numberOfCallBackCalled++; };

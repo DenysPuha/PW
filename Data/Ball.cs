@@ -17,12 +17,12 @@ namespace TP.ConcurrentProgramming.Data
   {
     #region ctor
 
-    internal Ball(Vector initialPosition, Vector initialVelocity, Action<IBall, IVector> checkColision)
+    internal Ball(Vector initialPosition, Vector initialVelocity, Action<IBall, IVector, double> checkColision, LoggerAPI log)
     {
+      logger = log;
       Position = initialPosition;
       Velocity = initialVelocity;
             _checkColision = checkColision;
-
             ThreadStart ts = new ThreadStart(MoveLoop);
             _thread = new System.Threading.Thread(ts);
             _thread.IsBackground = true;
@@ -56,12 +56,14 @@ namespace TP.ConcurrentProgramming.Data
         #endregion IBall
 
         #region private
+
+        private readonly LoggerAPI logger;
         private readonly object _lock = new();
 
         private Thread _thread;
         private volatile bool _running = true;
 
-        private readonly Action<IBall, IVector> _checkColision;
+        private readonly Action<IBall, IVector, double> _checkColision;
 
         private Vector Position;
 
@@ -69,23 +71,39 @@ namespace TP.ConcurrentProgramming.Data
     {
       NewPositionNotification?.Invoke(this, Position);
     }
-        private void MoveLoop() {
-            while(_running){
-                _checkColision(this, Position);
-                Move(new Vector(Velocity.x/ Math.Abs(Velocity.x), Velocity.y / Math.Abs(Velocity.y)));
-                Thread.Sleep((int)(20/ Math.Sqrt(Velocity.x*Velocity.x+Velocity.y*Velocity.y)));
-            }
-         }
 
-    private void Move(Vector delta)
-    {
-            lock(_lock)
+        private void MoveLoop()
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            while (_running)
             {
-                Position = new Vector(Position.x + delta.x, Position.y + delta.y);  
+                double deltaT = stopwatch.Elapsed.TotalSeconds;
+                stopwatch.Restart();
+
+                Vector velocitySnapshot;
+                lock (_lock)
+                {
+                    velocitySnapshot = new Vector(Velocity.x, Velocity.y);
+                }
+                Vector delta = new Vector(velocitySnapshot.x * deltaT, velocitySnapshot.y * deltaT);
+
+                _checkColision(this, Position, deltaT);
+                Move(delta);
+
+                Thread.Sleep(5); 
+            }
+        }
+        private void Move(Vector delta)
+        {
+            lock (_lock)
+            {
+                Position = new Vector(Position.x + delta.x, Position.y + delta.y);
+                logger.AddToQueue($"Ball position: ({Position.x},{Position.y}), Velocity: ({Velocity.x},{Velocity.y})");
             }
             RaiseNewPositionChangeNotification();
         }
 
-    #endregion private
-  }
+        #endregion private
+    }
 }

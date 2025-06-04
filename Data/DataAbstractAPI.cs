@@ -8,6 +8,8 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Threading;
+
 namespace TP.ConcurrentProgramming.Data
 {
   public abstract class DataAbstractAPI : IDisposable
@@ -51,7 +53,19 @@ namespace TP.ConcurrentProgramming.Data
     #endregion private
   }
 
-  public interface IVector
+  public abstract class LoggerAPI : IDisposable {
+        #region public API
+        public abstract void AddToQueue(string msg);
+        #endregion public API
+        #region IDisposable
+        public abstract void Dispose();
+        #endregion IDisposable
+        #region private
+        #endregion private
+
+    }
+
+    public interface IVector
   {
     /// <summary>
     /// The X component of the vector.
@@ -73,4 +87,5 @@ namespace TP.ConcurrentProgramming.Data
         IVector PositionValue { get; }
         IVector Velocity { get;}
   }
+
 }
