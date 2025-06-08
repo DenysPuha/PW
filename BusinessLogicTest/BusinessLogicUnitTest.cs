@@ -89,11 +89,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 throw new NotImplementedException();
             }
-
-            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, Data.IBall> updateBalls)
-            {
-                throw new NotImplementedException();
-            }
         }
 
     private class DataLayerDisposeFixcure : Data.DataAbstractAPI
@@ -122,11 +117,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       }
 
             public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, Data.IBall> updateBalls)
             {
                 throw new NotImplementedException();
             }
@@ -168,17 +158,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 UpdateBallsCountCalled = true;
                 NumberOfBallseCreated = numberOfBalls;
                 upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
-            }
-
-            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, Data.IBall> updateBalls)
-            {
-                ChangeWindowSizeCalled = true;
-                WindowHeightCreated = windowHeight;
-                WindowWidthCreated = windowWidth;
-                SquareHegihtCreated = squareHeight;
-                SquareWidthCreated = squareWidth;
-                upperLayerHandler(squareWidth, squareHeight);
-                updateBalls(new DataVectorFixture(), new DataBallFixture());
             }
 
             private record DataVectorFixture : Data.IVector

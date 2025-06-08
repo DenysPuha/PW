@@ -98,50 +98,6 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
-    public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, IBall> updateBalls)
-    {
-
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(DataImplementation));
-            if (upperLayerHandler == null)
-                throw new ArgumentNullException(nameof(upperLayerHandler));
-            if (updateBalls == null)
-                throw new ArgumentNullException(nameof(updateBalls));
-            Boolean isSizeChanged = false;
-            if (windowWidth - squareWidth <= 80)
-            {
-                squareWidth = windowWidth / 1.2;
-                squareHeight = squareWidth * 1.05;
-                isSizeChanged = true;
-            }
-            if (windowHeight - squareHeight <= 140)
-            {
-                squareHeight = windowHeight / 1.33;
-                squareWidth = squareHeight / 1.05;
-                isSizeChanged = true;
-            }
-            if (isSizeChanged)
-            {
-                List<Ball> copy = new();
-                foreach (Ball item in BallsList)
-                {
-                    Vector newPosition = new(item.PositionValue.x * squareWidth / width, item.PositionValue.y * squareHeight / height);
-                    Vector newVelocity = (Vector)item.Velocity;
-                    Ball newBall = new(newPosition, newVelocity, checkColisionHandler, logger);
-                    copy.Add(newBall);
-                }
-                BallsList.Clear();
-                BallsList = copy;
-            }
-            foreach (Ball item in BallsList)
-            {
-                updateBalls(item.PositionValue, item);
-            }
-            width = squareWidth;
-            height = squareHeight;
-            upperLayerHandler(width, height);
-        }
-
         public event EventHandler<BallChaneEventArgs>? BallChanged;
 
         
@@ -187,9 +143,7 @@ namespace TP.ConcurrentProgramming.Data
     private Random RandomGenerator = new();
     private List<Ball> BallsList = [];
         private Func<IVector, bool>? isValidPosition;
-        private double width = 400;
-            private double height = 420;
-        private void checkColisionHandler(IBall Ball, IVector Pos, double refreshTime)
+        private void checkColisionHandler(IBall Ball, IVector Pos)
         {
             BallChanged?.Invoke(this, new BallChaneEventArgs { Ball = Ball, Pos = Pos, refreshTime = refreshTime });
         }
