@@ -30,19 +30,14 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     public abstract void UpdateBallsCount(int numberofBalls);
 
-    public abstract void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight);
-
 
         #region IObservable
 
         public abstract IDisposable Subscribe(IObserver<IBall> observer);
 
-        public abstract IDisposable SubscribeToWindowChanges(IObserver<WindowChangedEventArgs> observer);
-
         #endregion IObservable
 
         #region IDisposable
-
         public abstract void Dispose();
 
     #endregion IDisposable

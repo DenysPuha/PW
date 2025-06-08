@@ -27,11 +27,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     {
       ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
       Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
-      WindowObserver = ModelLayer.SubscribeToWindowChanges(new AnonymousObserver<WindowChangedEventArgs>(e =>
-        {
-            SquareWidth = e.SquareWidth;
-            SquareHeight = e.SquareHeight;
-        }));
         }
 
     #endregion ctor
@@ -54,14 +49,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             ModelLayer.UpdateBallsCount(numberOfBalls);
         }
 
-    public void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
-        {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(MainWindowViewModel));
-            Balls.Clear();
-            ModelLayer.ChangeWindowSize(windowWidth, windowHeight, squareWidth, squareHeight);
-        }
-
         public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
     #endregion public API
@@ -76,7 +63,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         {
           Balls.Clear();
           Observer.Dispose();
-            WindowObserver.Dispose();
             ModelLayer.Dispose();
         }
 
@@ -104,64 +90,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     private bool Disposed = false;
 
         #endregion private
-        private double _windowWidth = 1152;
-        public double WindowWidth
-        {
-            get => _windowWidth;
-            set
-            {
-                _windowWidth = value;
-                RaisePropertyChanged(nameof(WindowWidth));
-                ChangeSize.Execute(null);
-            }
-        }
-
-        private double _windowHeight = 592;
-        public double WindowHeight
-        {
-            get => _windowHeight;
-            set
-            {
-                _windowHeight = value;
-                RaisePropertyChanged(nameof(WindowHeight));
-                ChangeSize.Execute(null);
-            }
-        }
-
-        private double _squareWidth = 400;
-        public double SquareWidth
-        {
-            get => _squareWidth;
-            set
-            {
-                _squareWidth = value;
-                RaisePropertyChanged(nameof(SquareWidth));
-            }
-        }
-
-        private double _squareHeight = 420;
-        public double SquareHeight
-        {
-            get => _squareHeight;
-            set
-            {
-                _squareHeight = value;
-                RaisePropertyChanged(nameof(SquareHeight));
-            }
-        }
-
-        private RelayCommand _changeSize;
-        public RelayCommand ChangeSize
-        {
-            get
-            {
-                return _changeSize ??= new RelayCommand(() =>
-                {
-                    ChangeWindowSize(_windowWidth, _windowHeight, _squareWidth, _squareHeight);
-                });
-            }
-        }
-
         private Boolean _firstValue = true;
         private int _ballCount = 5;
         public int BallCount

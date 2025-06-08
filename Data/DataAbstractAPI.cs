@@ -28,8 +28,6 @@ namespace TP.ConcurrentProgramming.Data
 
         public abstract void SetPositionValidator(Func<IVector, bool> validator);
 
-        public abstract void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IVector, IBall> updateBalls);
-
         #endregion public API
 
         #region IObservable

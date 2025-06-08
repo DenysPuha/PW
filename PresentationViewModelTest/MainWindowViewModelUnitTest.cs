@@ -89,25 +89,11 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Started = numberofBalls;
     }
 
-            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
-            {
-                WindowHeightCreated = windowHeight;
-                WindowWidthCreated = windowWidth;
-                SquareHeightCreated = squareHeight;
-                SquareWidthCreated = squareWidth;
-            }
-
             public override IDisposable Subscribe(IObserver<ModelIBall> observer)
       {
         Subscribed++;
         return new NullDisposable();
       }
-
-            public override IDisposable SubscribeToWindowChanges(IObserver<WindowChangedEventArgs> observer)
-            {
-                Subscribed++;
-                return new NullDisposable();
-            }
 
 
             #endregion ModelAbstractApi
@@ -137,7 +123,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       public ModelSimulatorFixture()
       {
         eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
-        windowChangedObservable = Observable.FromEventPattern<WindowChangedEventArgs>(this, "WindowChanged");
       }
 
       #endregion ctor
@@ -148,11 +133,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       {
         return eventObservable?.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
       }
-
-        public override IDisposable? SubscribeToWindowChanges(IObserver<WindowChangedEventArgs> observer)
-        {
-            return windowChangedObservable?.Subscribe(x => observer.OnNext(x.EventArgs), ex => observer.OnError(ex), () => observer.OnCompleted());
-        }
 
             public override void Start(int numberOfBalls)
       {
@@ -172,20 +152,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
                 }
             }
 
-            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight)
-            {
-                for (int i = 0; i < NumberOfBalls; i++)
-                {
-                    ModelBall newBall = new ModelBall(0, 0) { };
-                    BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
-                }
-                WindowChanged?.Invoke(this, new WindowChangedEventArgs
-                {
-                    SquareWidth = squareWidth,
-                    SquareHeight = squareHeight
-                });
-            }
-
             public override void Dispose()
       {
         Disposed = true;
@@ -196,14 +162,12 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
             #region API
 
             public event EventHandler<BallChaneEventArgs> BallChanged;
-            public event EventHandler<WindowChangedEventArgs> WindowChanged;
 
             #endregion API
 
             #region private
 
             private IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
-      private IObservable<EventPattern<WindowChangedEventArgs>>? windowChangedObservable = null;
 
       private class ModelBall : ModelIBall
       {

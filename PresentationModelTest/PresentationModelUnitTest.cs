@@ -83,16 +83,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
                 Assert.IsNotNull(upperLayerHandler);
             }
 
-            public override void ChangeWindowSize(double windowWidth, double windowHeight, double squareWidth, double squareHeight, Action<double, double> upperLayerHandler, Action<IPosition, BusinessLogic.IBall> updateBalls)
-            {
-                WindowHeightCreated = windowHeight;
-                WindowWidthCreated = windowWidth;
-                SquareHeightCreated = squareHeight;
-                SquareWidthCreated = squareWidth;
-                Assert.IsNotNull(upperLayerHandler);
-                Assert.IsNotNull(updateBalls);
-            }
-
             #endregion BusinessLogicAbstractAPI
         }
 
