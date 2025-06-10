@@ -28,8 +28,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     public abstract void Start(int numberOfBalls);
 
-    public abstract void UpdateBallsCount(int numberofBalls);
-
 
         #region IObservable
 

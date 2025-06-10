@@ -41,14 +41,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       ModelLayer.Start(numberOfBalls);
         }
 
-    public void UpdateBallsCount(int numberOfBalls)
-        {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(MainWindowViewModel));
-            Balls.Clear();
-            ModelLayer.UpdateBallsCount(numberOfBalls);
-        }
-
         public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
     #endregion public API
@@ -85,7 +77,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     #region private
 
     private IDisposable Observer = null;
-    private IDisposable WindowObserver = null;
     private ModelAbstractApi ModelLayer;
     private bool Disposed = false;
 
@@ -99,10 +90,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             {
                 _ballCount = value;
                 RaisePropertyChanged(nameof(BallCount));
-                if(!_firstValue)
-                    StartCommand.Execute(null);
-                else
-                    _firstValue = false;
             }
         }
 
@@ -113,21 +100,12 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             {
                 return _startCommand ??= new RelayCommand(() =>
                 {
-                    UpdateBallsCount(_ballCount);
-                });
-            }
-        }
+                    if (_firstValue)
+                    {
+                        Start(_ballCount);
+                        _firstValue = false;
+                    }
 
-        private RelayCommand _stopCommand;
-        public RelayCommand StopCommand
-        {
-            get
-            {
-                return _stopCommand ??= new RelayCommand(() =>
-                {
-                    _ballCount = 0;
-                    RaisePropertyChanged(nameof(BallCount));
-                    UpdateBallsCount(_ballCount);
                 });
             }
         }

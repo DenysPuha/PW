@@ -35,7 +35,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Assert.IsNotNull(viewModel.Balls);
         Assert.AreEqual<int>(0, nullModelFixture.Disposed);
         Assert.AreEqual<int>(numberOfBalls, nullModelFixture.Started);
-        Assert.AreEqual<int>(2, nullModelFixture.Subscribed);
+        Assert.AreEqual<int>(1, nullModelFixture.Subscribed);
       }
       Assert.AreEqual<int>(1, nullModelFixture.Disposed);
     }
@@ -65,10 +65,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       internal int Disposed = 0;
       internal int Started = 0;
       internal int Subscribed = 0;
-            internal double WindowHeightCreated;
-            internal double WindowWidthCreated;
-            internal double SquareHeightCreated;
-            internal double SquareWidthCreated;
 
             #endregion Test
 
@@ -84,10 +80,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         Started = numberOfBalls;
       }
 
-    public override void UpdateBallsCount(int numberofBalls)
-    {
-        Started = numberofBalls;
-    }
 
             public override IDisposable Subscribe(IObserver<ModelIBall> observer)
       {
@@ -142,15 +134,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
           BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }
       }
-
-            public override void UpdateBallsCount(int numberofBalls)
-            {
-                for (int i = 0; i < numberofBalls; i++)
-                {
-                    ModelBall newBall = new ModelBall(0, 0) { };
-                    BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
-                }
-            }
 
             public override void Dispose()
       {

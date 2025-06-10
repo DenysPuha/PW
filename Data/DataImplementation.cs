@@ -24,17 +24,12 @@ namespace TP.ConcurrentProgramming.Data
 
     public DataImplementation()
     {
-            eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+ 
     }
 
         #endregion ctor
 
         #region DataAbstractAPI
-
-        public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
-        {
-            return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs), ex => observer.OnError(ex), () => observer.OnCompleted());
-        }
 
         public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
     {
@@ -48,57 +43,17 @@ namespace TP.ConcurrentProgramming.Data
                 Ball? newBall;
                 Vector startingPosition;
                 Vector startingVelocity;
-                Vector predictDelta = new(0, 0);
                 do
                 {
                     startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-                    startingVelocity = new((random.NextDouble() - 0.5) * 300, (random.NextDouble() - 0.5) * 300);
-                    newBall = new(startingPosition, startingVelocity, checkColisionHandler, logger);
                 } while (isValidPosition != null && !isValidPosition(startingPosition));
+                startingVelocity = new((random.NextDouble() - 0.5) * 300, (random.NextDouble() - 0.5) * 300);
+                newBall = new(startingPosition, startingVelocity);
 
                 upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
     }
-
-    public override void UpdateBallsCount(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
-        {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(DataImplementation));
-            int sizeOfBallList = BallsList.Count;
-            if (numberOfBalls < sizeOfBallList)
-            {
-                for(int i = 0; i < sizeOfBallList - numberOfBalls; i++)
-                {
-                    BallsList[BallsList.Count - 1].Stop();
-                    BallsList.RemoveAt(BallsList.Count-1);
-                }
-            }
-            else
-            {
-                Random random = new Random();
-                for (int i = 0; i < numberOfBalls - sizeOfBallList; i++)
-                {
-                    Ball? newBall;
-                    Vector startingPosition;
-                    Vector startingVelocity;
-                    Vector predictDelta = new(0, 0);
-                    do
-                    {
-                        startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-                        startingVelocity = new((random.NextDouble() - 0.5) * 300, (random.NextDouble() - 0.5) * 300);
-                        newBall = new(startingPosition, startingVelocity, checkColisionHandler, logger);
-                    } while (isValidPosition != null && !isValidPosition(startingPosition));
-                    BallsList.Add(newBall);
-                }
-            }
-            for (int i = 0; i < BallsList.Count; i++)
-            {
-                upperLayerHandler(BallsList[i].PositionValue, BallsList[i]);
-            }
-        }
-
-        public event EventHandler<BallChaneEventArgs>? BallChanged;
 
         
         public override void SetPositionValidator(Func<IVector, bool> validator)
@@ -136,17 +91,11 @@ namespace TP.ConcurrentProgramming.Data
         #region private
 
         //private bool disposedValue;
-        private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable;
         private bool Disposed = false;
-        private readonly Logger logger = new();
 
     private Random RandomGenerator = new();
     private List<Ball> BallsList = [];
         private Func<IVector, bool>? isValidPosition;
-        private void checkColisionHandler(IBall Ball, IVector Pos)
-        {
-            BallChanged?.Invoke(this, new BallChaneEventArgs { Ball = Ball, Pos = Pos, refreshTime = refreshTime });
-        }
 
     #endregion private
 
@@ -172,60 +121,4 @@ namespace TP.ConcurrentProgramming.Data
 
     #endregion TestingInfrastructure
   }
-    public class BallChaneEventArgs : EventArgs
-    {
-        public required IBall Ball { get; init; }
-
-        public required IVector Pos {get; init;}
-
-        public double refreshTime { get; init; }
-    }
-
-    internal class Logger : LoggerAPI
-    {
-
-        #region ctor
-        public Logger()
-        {
-            ThreadStart ts = new ThreadStart(LogLoop);
-            thread = new System.Threading.Thread(ts);
-            thread.IsBackground = true;
-            thread.Start();
-        }
-        #endregion ctor
-        #region DataAbstractAPI
-        public override void AddToQueue(string msg)
-        {
-            if (!isDisposed)
-                queue.Add($"{DateTime.Now:HH:mm:ss:fff}: {msg}");
-        }
-
-        #endregion DataAbstractAPI
-        #region IDisposable
-        public override void Dispose()
-        {
-            if (!isDisposed)
-            {
-                queue.CompleteAdding();
-                isDisposed = true;
-                thread.Join();
-            }
-        }
-        #endregion IDisposable
-        #region private
-        private Thread thread;
-        private bool isDisposed = false;
-        private readonly BlockingCollection<string> queue = new();
-        private void LogLoop()
-        {
-            using StreamWriter writer = new("log.txt", false);
-            foreach (string msg in queue.GetConsumingEnumerable())
-            {
-                writer.WriteLine(msg);
-                writer.Flush();
-            }
-        }
-        #endregion private
-    }
-
 }

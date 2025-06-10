@@ -49,11 +49,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       layerBellow.Start(numberOfBalls, StartHandler);
     }
 
-    public override void UpdateBallsCount(int numberofBalls)
-        {
-            layerBellow.UpdateBallsCount(numberofBalls, StartHandler);
-        }
-
         #endregion ModelAbstractApi
 
         #region API

@@ -75,20 +75,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 SetPositionValidatorCalled = true;
                 SetPositionValidatorFunc = validator;
             }
-
-            public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
-            {
-                return new AnonymousObserver<BallChaneEventArgs>(x => { });
-            }
             public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
       {
        
       }
-
-            public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
-            {
-                throw new NotImplementedException();
-            }
         }
 
     private class DataLayerDisposeFixcure : Data.DataAbstractAPI
@@ -100,26 +90,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         Disposed = true;
       }
 
-            public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
-            {
-                return new AnonymousObserver<BallChaneEventArgs>(x => { });
-            }
             public bool SetPositionValidatorCalled = false;
-            public Func<IVector, bool> SetPositionValidatorFunc;
             public override void SetPositionValidator(Func<IVector, bool> validator)
             {
                 SetPositionValidatorCalled = true;
-                SetPositionValidatorFunc = validator;
             }
             public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
       {
         throw new NotImplementedException();
       }
-
-            public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
-            {
-                throw new NotImplementedException();
-            }
         }
 
     private class DataLayerStartFixcure : Data.DataAbstractAPI
@@ -136,10 +115,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             public override void Dispose()
       { }
             public bool Disposed = false;
-            public override IDisposable Subscribe(IObserver<BallChaneEventArgs> observer)
-            {
-                return new AnonymousObserver<BallChaneEventArgs>(x => { });
-            }
             public override void SetPositionValidator(Func<IVector, bool> validator)
             {
                 
@@ -152,13 +127,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         NumberOfBallseCreated = numberOfBalls;
         upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
       }
-
-            public override void UpdateBallsCount(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
-            {
-                UpdateBallsCountCalled = true;
-                NumberOfBallseCreated = numberOfBalls;
-                upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
-            }
 
             private record DataVectorFixture : Data.IVector
       {

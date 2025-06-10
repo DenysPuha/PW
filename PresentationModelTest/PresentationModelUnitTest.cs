@@ -77,12 +77,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
         Assert.IsNotNull(upperLayerHandler);
       }
 
-            public override void UpdateBallsCount(int numberofBalls, Action<IPosition, BusinessLogic.IBall> upperLayerHandler)
-            {
-                NumberOfBalls = numberofBalls;
-                Assert.IsNotNull(upperLayerHandler);
-            }
-
             #endregion BusinessLogicAbstractAPI
         }
 

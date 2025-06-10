@@ -18,9 +18,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     [TestMethod]
     public void MoveTestMethod()
     {
+      List<Ball> _testBallList = new();
       DataBallFixture dataBallFixture = new DataBallFixture();
       IVector testinVector = new VectorFixture(0.0, 0.0);
-      Ball newInstance = new(dataBallFixture, new Position(testinVector.x, testinVector.y));
+      Ball newInstance = new(dataBallFixture, _testBallList);
       int numberOfCallBackCalled = 0;
       newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); Assert.IsNotNull(position); numberOfCallBackCalled++; };
       dataBallFixture.Move();

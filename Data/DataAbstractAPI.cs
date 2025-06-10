@@ -26,17 +26,10 @@ namespace TP.ConcurrentProgramming.Data
     #region public API
 
     public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
-    public abstract void UpdateBallsCount(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
         public abstract void SetPositionValidator(Func<IVector, bool> validator);
 
         #endregion public API
-
-        #region IObservable
-
-        public abstract IDisposable Subscribe(IObserver<BallChaneEventArgs> observer);
-
-        #endregion IObservable
 
         #region IDisposable
 
@@ -50,18 +43,6 @@ namespace TP.ConcurrentProgramming.Data
 
     #endregion private
   }
-
-  public abstract class LoggerAPI : IDisposable {
-        #region public API
-        public abstract void AddToQueue(string msg);
-        #endregion public API
-        #region IDisposable
-        public abstract void Dispose();
-        #endregion IDisposable
-        #region private
-        #endregion private
-
-    }
 
     public interface IVector
   {
@@ -81,7 +62,6 @@ namespace TP.ConcurrentProgramming.Data
     event EventHandler<IVector> NewPositionNotification;
 
         void SetVelocity(double x, double y);
-
         IVector PositionValue { get; }
         IVector Velocity { get;}
   }
