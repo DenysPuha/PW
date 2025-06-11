@@ -47,12 +47,16 @@ namespace TP.ConcurrentProgramming.Data
                 {
                     startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                 } while (isValidPosition != null && !isValidPosition(startingPosition));
-                startingVelocity = new((random.NextDouble() - 0.5) * 300, (random.NextDouble() - 0.5) * 300);
+                startingVelocity = new((random.NextDouble() - 0.5) * 60, (random.NextDouble() - 0.5) * 60);
                 newBall = new(startingPosition, startingVelocity);
                 logger.AddToQueue(DateTime.UtcNow, "Ball created", startingPosition, startingVelocity);
                 upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
+      for(int i = 0; i < numberOfBalls; i++)
+            {
+                BallsList[i].Start();
+            }
     }
 
         

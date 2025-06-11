@@ -55,7 +55,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       _upperLayerHandler = upperLayerHandler;
       logger = ILogger.CreateDefaultLogger();
       layerBellow.Start(numberOfBalls, (startingPosition, databall) => {
-          Ball ball = new Ball(databall, _ballList, logger);
+          Ball ball = new Ball(databall, _ballList,_lock, logger);
           _ballList.Add(ball);
           upperLayerHandler(new Position(startingPosition.x, startingPosition.y), ball);
       }, logger);
@@ -73,6 +73,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly UnderneathLayerAPI layerBellow;
 
         private readonly List<Ball> _ballList = new();
+        private readonly object _lock = new();
 
         private double width = 400;
         private double height = 420;

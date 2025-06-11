@@ -24,12 +24,16 @@ namespace TP.ConcurrentProgramming.Data
             ThreadStart ts = new ThreadStart(MoveLoop);
             _thread = new System.Threading.Thread(ts);
             _thread.IsBackground = true;
-            _thread.Start();
     }
 
     #endregion ctor
 
     #region IBall
+
+        public void Start()
+        {
+             _thread.Start();
+        }
 
         public void Stop()
         {
@@ -48,8 +52,18 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
+        public IVector PositionValue
+        {
+            get
+            {
+                lock (_lockPosition)
+                {
+                    return Position;
+                }
+            }
+        }
+
         public IVector Velocity { get; set; }
-        public IVector PositionValue => Position;
 
         #endregion IBall
 
@@ -57,6 +71,7 @@ namespace TP.ConcurrentProgramming.Data
 
         private readonly object _lock = new();
         private readonly object _lockVelocity = new();
+        private readonly object _lockPosition = new();
 
         private Thread _thread;
         private volatile bool _running = true;
@@ -71,13 +86,18 @@ namespace TP.ConcurrentProgramming.Data
 
         private void MoveLoop()
         {
+            Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
+            long previous = stopwatch.ElapsedMilliseconds;
             while (_running)
             {
-                double currentVelocity = Math.Sqrt(Velocity.x * Velocity.x + Velocity.y * Velocity.y);
-                refreshTime = Math.Clamp((int)(100 - currentVelocity * (100 - 10)),10,100);
+                long current = stopwatch.ElapsedMilliseconds;
+                refreshTime = (int)(current - previous);
+                previous = current;
                 Move(new Vector(Velocity.x * refreshTime / 1000, Velocity.y * refreshTime/1000));
-                Thread.Sleep(refreshTime);
             }
+            stopwatch.Stop();
         }
         private void Move(Vector delta)
         {

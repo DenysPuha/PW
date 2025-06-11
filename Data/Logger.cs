@@ -32,7 +32,7 @@ namespace TP.ConcurrentProgramming.Data
         public static Logger LoggerInstance => _loggerInstance.Value;
         public void AddToQueue(DateTime time, string message, IVector position, IVector velocity)
         {
-            if (!isDisposed)
+            if (!isDisposed && !queue.IsAddingCompleted)
             {
                 Log log = new Log(time, message, position, velocity);
                 if (!queue.TryAdd(log))
