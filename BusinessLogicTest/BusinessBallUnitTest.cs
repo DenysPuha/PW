@@ -21,8 +21,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       List<Ball> _testBallList = new();
       DataBallFixture dataBallFixture = new DataBallFixture();
       DummyLogger logger = new DummyLogger();
+      object _lock = new();
       IVector testinVector = new VectorFixture(0.0, 0.0);
-      Ball newInstance = new(dataBallFixture, _testBallList, logger);
+      Ball newInstance = new(dataBallFixture, _testBallList,_lock, logger);
       int numberOfCallBackCalled = 0;
       newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); Assert.IsNotNull(position); numberOfCallBackCalled++; };
       dataBallFixture.Move();
