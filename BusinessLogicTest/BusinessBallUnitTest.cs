@@ -44,7 +44,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
             public DataBallFixture()
             {
-                Velocity = new VectorFixture(0.0, 0.0);
+                _velocity = new VectorFixture(0.0, 0.0);
             }
 
             public Data.IVector PositionValue => new VectorFixture(0.0, 0.0);

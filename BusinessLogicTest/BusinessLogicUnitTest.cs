@@ -69,7 +69,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       { }
             public bool Disposed = false;
             public bool SetPositionValidatorCalled = false;
-            public Func<IVector, bool> SetPositionValidatorFunc = null;
+            public Func<IVector, bool>? SetPositionValidatorFunc = null;
             public override void SetPositionValidator(Func<IVector, bool> validator)
             {
                 SetPositionValidatorCalled = true;
