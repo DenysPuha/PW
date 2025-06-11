@@ -31,7 +31,7 @@ namespace TP.ConcurrentProgramming.Data
 
         #region DataAbstractAPI
 
-        public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
+        public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler, ILogger logger)
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(DataImplementation));
@@ -49,7 +49,7 @@ namespace TP.ConcurrentProgramming.Data
                 } while (isValidPosition != null && !isValidPosition(startingPosition));
                 startingVelocity = new((random.NextDouble() - 0.5) * 300, (random.NextDouble() - 0.5) * 300);
                 newBall = new(startingPosition, startingVelocity);
-
+                logger.AddToQueue(DateTime.UtcNow, "Ball created", startingPosition, startingVelocity);
                 upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }

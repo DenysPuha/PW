@@ -67,15 +67,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     {
       public override void Dispose()
       { }
-            public bool Disposed = false;
-            public bool SetPositionValidatorCalled = false;
-            public Func<IVector, bool>? SetPositionValidatorFunc = null;
             public override void SetPositionValidator(Func<IVector, bool> validator)
             {
-                SetPositionValidatorCalled = true;
-                SetPositionValidatorFunc = validator;
             }
-            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler, ILogger logger)
       {
        
       }
@@ -95,7 +90,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 SetPositionValidatorCalled = true;
             }
-            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler, ILogger logger)
       {
         throw new NotImplementedException();
       }
@@ -104,13 +99,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     private class DataLayerStartFixcure : Data.DataAbstractAPI
     {
       internal bool StartCalled = false;
-      internal bool UpdateBallsCountCalled = false;
-    internal bool ChangeWindowSizeCalled = false;
     internal int NumberOfBallseCreated = -1;
-            internal double WindowWidthCreated = -1;
-            internal double WindowHeightCreated = -1;
-            internal double SquareWidthCreated = -1;
-            internal double SquareHegihtCreated = -1;
 
             public override void Dispose()
       { }
@@ -120,7 +109,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 
             }
 
-            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+            public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler, ILogger logger)
       {
         StartCalled = true;
                 

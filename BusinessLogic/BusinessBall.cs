@@ -15,17 +15,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 {
   internal class Ball : IBall
   {
-    public Ball(Data.IBall ball, List<Ball> ballList)
-    {
-      _dataBall = ball;
-      positionValue = _dataBall.PositionValue;
-      _ballList = ballList;
-      ball.NewPositionNotification += RaisePositionChangeEvent;
-    }
+    public Ball(Data.IBall ball, List<Ball> ballList, ILogger logger)
+        {
+            this.logger = logger;
+            _dataBall = ball;
+            positionValue = _dataBall.PositionValue;
+            _ballList = ballList;
+            ball.NewPositionNotification += RaisePositionChangeEvent;
+            
+        }
 
-    #region IBall
+        #region IBall
 
-    public event EventHandler<IPosition>? NewPositionNotification;
+        public event EventHandler<IPosition>? NewPositionNotification;
 
         public IVector getPosition => positionValue;
 
@@ -33,7 +35,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         #region private
 
-        IVector positionValue;
+        private ILogger logger;
+
+        private IVector positionValue;
 
         private readonly object _lock = new();
 
@@ -43,11 +47,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private void RaisePositionChangeEvent(object? sender, Data.IVector e)
     {
-            CheckColision(e);
+            CheckCollision(e);
             NewPositionNotification?.Invoke(this, new Position(e.x, e.y));
     }
 
-        private void CheckColision(Data.IVector e)
+        private void CheckCollision(Data.IVector e)
         {
             lock (_lock)
             {
@@ -57,10 +61,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 if ((newPos.x <= 0) | (newPos.x + 20 >= 400 - 4 * 2))
                 {
                     _dataBall.SetVelocity(-_dataBall.Velocity.x, _dataBall.Velocity.y);
+                    logger.AddToQueue(DateTime.UtcNow, "Collision with X wall", _dataBall.PositionValue, _dataBall.Velocity);
                 }
                 if ((newPos.y <= 0) | (newPos.y + 20 >= 420 - 4 * 2))
                 {
                     _dataBall.SetVelocity(_dataBall.Velocity.x, -_dataBall.Velocity.y);
+                    logger.AddToQueue(DateTime.UtcNow, "Collision with Y wall", _dataBall.PositionValue, _dataBall.Velocity);
                 }
                 double distance;
                 for (int i = 0; i < _ballList.Count; i++)
@@ -81,6 +87,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 if (indx == -1) return;
                 else
                 {
+                    logger.AddToQueue(DateTime.UtcNow, "Collision with ball", _dataBall.PositionValue, _dataBall.Velocity);
                     Ball B = _ballList[indx];
 
                     IPosition posB = new Position(B._dataBall.PositionValue.x, B._dataBall.PositionValue.y);

@@ -25,7 +25,7 @@ namespace TP.ConcurrentProgramming.Data
 
     #region public API
 
-    public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
+    public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler, ILogger logger);
 
         public abstract void SetPositionValidator(Func<IVector, bool> validator);
 
@@ -65,5 +65,11 @@ namespace TP.ConcurrentProgramming.Data
         IVector PositionValue { get; }
         IVector Velocity { get;}
   }
+
+    public interface ILogger : IDisposable
+    {
+        public void AddToQueue(DateTime time, string message, IVector position, IVector velocity);
+        static ILogger CreateDefaultLogger() => Logger.LoggerInstance;
+    }
 
 }
